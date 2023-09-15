@@ -1,0 +1,20 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build and Push the Docker image
+      run: | 
+          docker docker build . --file Dockerfile --tag ${{ env.REGISTRY }}/roweb/sd-all:latest
+          docker push ${{ env.REGISTRY }}/roweb/sd-all:latest
