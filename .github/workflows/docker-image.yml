@@ -25,5 +25,5 @@ jobs:
     - name: Build and Push the Docker image
     
       run: | 
-          docker docker build -t ${{ env.REGISTRY }}/roweb/sd-all:latest .
+          docker build -t ${{ env.REGISTRY }}/roweb/sd-all:latest .
           docker push ${{ env.REGISTRY }}/roweb/sd-all:latest
