@@ -3,11 +3,11 @@ FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 as base
 
 ARG WEBUI_VERSION=v1.6.0
 ARG DREAMBOOTH_COMMIT=cf086c536b141fc522ff11f6cffc8b7b12da04b9
-ARG KOHYA_VERSION=v21.8.9
+ARG KOHYA_VERSION=v22.1.0
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive \
-    TZ=Africa/Johannesburg \
+    TZ=Europe/London \
     PYTHONUNBUFFERED=1 \
     SHELL=/bin/bash
 
@@ -66,8 +66,8 @@ RUN apt update && \
 RUN ln -s /usr/bin/python3.10 /usr/bin/python
 
 # Install Torch, xformers and tensorrt
-RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip3 install --no-cache-dir xformers==0.0.21 tensorrt
+RUN pip3 install --no-cache-dir torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+    pip3 install --no-cache-dir xformers==0.0.22 tensorrt
 
 # Stage 2: Install applications
 FROM base as setup
@@ -93,7 +93,7 @@ RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
 WORKDIR /stable-diffusion-webui
 RUN python3 -m venv --system-site-packages /venv && \
     source /venv/bin/activate && \
-    pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+    pip install --no-cache-dir torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
     pip install --no-cache-dir xformers && \
     deactivate
 
@@ -117,7 +117,10 @@ RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extension
     git clone --depth=1 https://github.com/Mikubill/sd-webui-controlnet.git extensions/sd-webui-controlnet && \
     git clone --depth=1 https://github.com/ashleykleynhans/a1111-sd-webui-locon.git extensions/a1111-sd-webui-locon && \
     git clone --depth=1 https://github.com/ashleykleynhans/sd-webui-roop.git extensions/sd-webui-roop && \
-    git clone --depth=1 https://github.com/Bing-su/adetailer.git extensions/adetailer
+    git clone --depth=1 https://github.com/zanllp/sd-webui-infinite-image-browsing.git extensions/infinite-image-browsing && \
+    git clone --depth=1 https://github.com/Uminosachi/sd-webui-inpaint-anything.git extensions/inpaint-anything && \
+    git clone --depth=1 https://github.com/Bing-su/adetailer.git extensions/adetailer && \
+    git clone --depth=1 https://github.com/civitai/sd_civitai_extension.git extensions/sd_civitai_extension
 
 # Install dependencies for Deforum, ControlNet, roop, and After Detailer extensions
 RUN source /venv/bin/activate && \
@@ -127,8 +130,17 @@ RUN source /venv/bin/activate && \
     pip3 install -r requirements.txt && \
     cd /stable-diffusion-webui/extensions/sd-webui-roop && \
     pip3 install -r requirements.txt && \
+    cd /stable-diffusion-webui/extensions/infinite-image-browsing && \
+    pip3 install -r requirements.txt && \
     cd /stable-diffusion-webui/extensions/adetailer && \
     python -m install && \
+    cd /stable-diffusion-webui/extensions/sd_civitai_extension && \
+    pip3 install -r requirements.txt && \
+    deactivate
+
+# Install dependencies for inpaint anything extension
+RUN source /venv/bin/activate && \
+    pip3 install segment_anything lama_cleaner && \
     deactivate
 
 # Set Dreambooth extension version
@@ -159,15 +171,17 @@ RUN source /venv/bin/activate && \
 # Install Kohya_ss
 RUN git clone https://github.com/bmaltais/kohya_ss.git /kohya_ss
 WORKDIR /kohya_ss
+COPY kohya_ss/requirements* ./
 RUN git checkout ${KOHYA_VERSION} && \
     python3 -m venv --system-site-packages venv && \
     source venv/bin/activate && \
-    pip3 install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip3 install --no-cache-dir xformers==0.0.21 \
+    pip3 install --no-cache-dir torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+    pip3 install --no-cache-dir xformers==0.0.22 \
         bitsandbytes==0.41.1 \
-        tensorboard==2.12.3 \
-        tensorflow==2.12.0 \
+        tensorboard==2.14.1 \
+        tensorflow==2.14.0 \
         wheel \
+        scipy \
         tensorrt && \
     pip3 install -r requirements.txt && \
     pip3 install . && \
@@ -179,8 +193,8 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /ComfyUI
 WORKDIR /ComfyUI
 RUN python3 -m venv --system-site-packages venv && \
     source venv/bin/activate && \
-    pip3 install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip3 install --no-cache-dir xformers==0.0.21 && \
+    pip3 install --no-cache-dir torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+    pip3 install --no-cache-dir xformers==0.0.22 && \
     pip3 install -r requirements.txt && \
     pip3 cache purge && \
     deactivate
@@ -201,6 +215,9 @@ RUN pip3 install -U --no-cache-dir jupyterlab \
         ipykernel \
         ipywidgets \
         gdown
+
+# Install rclone
+RUN curl https://rclone.org/install.sh | bash
 
 # Install runpodctl
 RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl-linux-amd -O runpodctl && \
@@ -233,9 +250,13 @@ COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/502.html /usr/share/nginx/html/502.html
 COPY nginx/README.md /usr/share/nginx/html/README.md
 
-# Set up the container startup script
 WORKDIR /
-COPY --chmod=755 pre_start.sh start.sh fix_venv.sh kohya_ss/accelerate.yaml ./
+
+# Copy the scripts
+COPY --chmod=755 pre_start.sh start.sh fix_venv.sh download.sh ./
+
+# Copy the accelerate configuration
+COPY kohya_ss/accelerate.yaml ./
 
 # Start the container
 SHELL ["/bin/bash", "--login", "-c"]

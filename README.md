@@ -14,23 +14,27 @@ Now with SDXL support.
 * [Deforum extension](
   https://github.com/deforum-art/sd-webui-deforum)
 * [ControlNet extension](
-  https://github.com/Mikubill/sd-webui-controlnet) v1.1.410
+  https://github.com/Mikubill/sd-webui-controlnet) v1.1.411
 * [After Detailer extension](
-  https://github.com/Bing-su/adetailer) v23.9.2
+  https://github.com/Bing-su/adetailer) v23.10.1
 * [Locon extension](
   https://github.com/ashleykleynhans/a1111-sd-webui-locon)
 * [roop extension](https://github.com/s0md3v/sd-webui-roop) 0.0.2
-* [Kohya_ss](https://github.com/bmaltais/kohya_ss) v21.8.9
+* [Inpaint Anything extension](https://github.com/Uminosachi/sd-webui-inpaint-anything)
+* [Infinite Image Browsing extension](https://github.com/zanllp/sd-webui-infinite-image-browsing)
+* [Civitai extension](https://github.com/civitai/sd_civitai_extension)
+* [Kohya_ss](https://github.com/bmaltais/kohya_ss) v22.1.0
 * [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
 * [ComfyUI Manager](https://github.com/ltdrdata/ComfyUI-Manager.git)
 * Torch 2.0.1
-* xformers 0.0.21
+* xformers 0.0.22
 * sd_xl_base_1.0.safetensors
 * sd_xl_refiner_1.0.safetensors
 * sdxl_vae.safetensors
 * inswapper_128.onnx
 * [runpodctl](https://github.com/runpod/runpodctl)
 * [croc](https://github.com/schollz/croc)
+* [rclone](https://rclone.org/)
 * [Application Manager](https://github.com/ashleykleynhans/app-manager)
 
 ## Available on RunPod
@@ -91,7 +95,7 @@ docker run -d \
   -p 8888:8888 \
   -e JUPYTER_PASSWORD=Jup1t3R! \
   -e ENABLE_TENSORBOARD=1 \
-  ashleykza/stable-diffusion-webui:3.0.3
+  ashleykza/stable-diffusion-webui:3.3.1
 ```
 
 You can obviously substitute the image name and tag with your own.
